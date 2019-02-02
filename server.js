@@ -18,6 +18,12 @@ function printResponse(success = true, message = '') {
     return {success: success, message: message}
 }
 
+// Root path: prints short instructions
+app.get('/', function (req, res) {
+    res.type('application/json')
+        .send(printResponse(true, "Navigate to /" + restaurantPath + "/:id to get info about it"));
+});
+
 
 
 
