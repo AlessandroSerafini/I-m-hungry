@@ -46,3 +46,11 @@ function sendUpdateErrorMessage(chatId) {
 function sendDeleteErrorMessage(chatId) {
     bot.sendMessage(chatId, 'Sorry, I\'m not able to delete the restaurant');
 }
+
+function sendOtherChoiceMessage(chatId) {
+    bot.sendMessage(chatId, 'I\'m a bot, not a human 🤖. Please give me the informations I need.', {
+        reply_markup: {
+            remove_keyboard: true
+        }
+    });
+}
