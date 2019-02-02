@@ -350,7 +350,6 @@ function getPlaceDetails(placeId) {
 
 function getRestaurants(chatId, filterKey, filterValue, equalTo = false) {
     return new Promise((resolve, reject) => {
-        //TODO: il messaggio di errore non sta venendo mandato
         let path = '/restaurants';
         switch (filterKey) {
             case 'food':
