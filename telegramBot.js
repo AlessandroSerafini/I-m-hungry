@@ -149,6 +149,67 @@ function initCtaListening() {
 }
 
 
+// HANDLE METHODS
+
+function handleGetRestaurants(chatId) {
+    bot.sendMessage(chatId, 'Nice, based on what criteria?', {
+        reply_markup: {
+            keyboard: [[
+                {
+                    text: 'By food',
+                },
+                {
+                    text: 'By name',
+                }
+            ]]
+        }
+    }).then((payload) => {
+        bot.once('message', (msg) => {
+            switch (msg.text) {
+                case 'By food':
+                    getFoods().then((categories) => {
+                        let choices = [];
+                        categories.forEach((category) => {
+                            choices.push({text: category.name});
+                        });
+                        let matrix = listToMatrix(choices, 2);
+                        bot.sendMessage(chatId, 'So.. which kind of food?', {
+                            reply_markup: {
+                                keyboard: matrix
+                            }
+                        }).then((payload) => {
+                            bot.once('message', (msg) => {
+                                getRestaurants(chatId, 'food', msg.text).then((restaurants) => {
+                                    sendPlaceDetailMessage(chatId, restaurants);
+                                });
+                            });
+                        });
+                    }).catch(() => {
+                        sendGetErrorMessage(chatId);
+                    });
+                break;
+                case 'By name':
+                    bot.sendMessage(chatId, 'So.. What\'s the restaurant name?', {
+                        reply_markup: {
+                            remove_keyboard: true
+                        }
+                    }).then((payload) => {
+                        bot.once('message', (msg) => {
+                            getRestaurants(chatId, 'name', msg.text).then((restaurants) => {
+                                sendPlaceDetailMessage(chatId, restaurants);
+                            });
+                        });
+                    });
+                break;
+                default:
+                    sendOtherChoiceMessage(chatId);
+                break;
+            }
+        });
+    });
+}
+
+
 
 
 initCtaListening();
