@@ -42,3 +42,7 @@ function sendAddErrorMessage(chatId) {
 function sendUpdateErrorMessage(chatId) {
     bot.sendMessage(chatId, 'Sorry, I\'m not able to update the restaurant');
 }
+
+function sendDeleteErrorMessage(chatId) {
+    bot.sendMessage(chatId, 'Sorry, I\'m not able to delete the restaurant');
+}
