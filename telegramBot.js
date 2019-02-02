@@ -34,3 +34,7 @@ function br2nl(text) {
 function sendGetErrorMessage(chatId) {
     bot.sendMessage(chatId, 'Sorry, I\'m not able to get restaurants');
 }
+
+function sendAddErrorMessage(chatId) {
+    bot.sendMessage(chatId, 'Sorry, I\'m not able to add the restaurant');
+}
