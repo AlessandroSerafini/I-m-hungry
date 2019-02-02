@@ -326,6 +326,25 @@ function getPlaceId(restaurant) {
     });
 }
 
+function getPlaceDetails(placeId) {
+    return new Promise((resolve, reject) => {
+        let options = {
+            baseUrl: googleApiBaseUrl,
+            path: '/maps/api/place/details/json?placeid=' + placeId + '&fields=name,formatted_address,rating,url,reviews&key=' + googleApiKey,
+            method: 'GET',
+        };
+        webService.getJSON(options).then((res) => {
+            if (res.statusCode === 200) {
+                resolve(res.obj.result);
+            } else {
+                reject();
+            }
+        }).catch(() => {
+            reject();
+        });
+    });
+}
+
 
 
 
