@@ -416,6 +416,36 @@ function getFoods() {
 }
 
 
+// SET METHODS
+
+function addRestaurant(chatId, newRestaurant) {
+    let options = {
+        baseUrl: 'i-am-hungry.glitch.me',
+        path: '/addRestaurant',
+        body: JSON.stringify(newRestaurant),
+        method: 'PUT',
+    };
+    let isThereAnError = false;
+    webService.getJSON(options).then((res) => {
+        if (res.statusCode === 200) {
+            bot.sendMessage(chatId, 'Restaurants added successfully! Give me five 🖐', {
+                reply_markup: {
+                    remove_keyboard: true
+                }
+            });
+        } else {
+            isThereAnError = true;
+        }
+    }).catch(() => {
+            isThereAnError = true;
+    });
+
+    if (isThereAnError) {
+        sendAddErrorMessage(chatId);
+    }
+}
+
+
 
 
 initCtaListening();
