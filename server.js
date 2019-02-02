@@ -168,11 +168,6 @@ app.delete('/deleteRestaurant/:id', function (req, res) {
     }
 });
 
-
-
-
-
-
 const server = app.listen(process.env.PORT, function () {
     console.log("Connecting to client");
 });
