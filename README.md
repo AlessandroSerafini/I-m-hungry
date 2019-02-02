@@ -5,7 +5,8 @@ This project is developed by Alessandro Serafini for the final exam of the cours
 ## About 
 
 Find the best restaurants uploaded by users, based on criteria such as name and kind of food. You can consult data sheets and customer ratings about your favorite restaurant.
-You can also add, edit and delete restaurants to keep the community alive!
+
+You can also add, edit and delete restaurants using telegram bot @AleSerafiniBot to keep the community alive!
 
 ## Documentation 
 
