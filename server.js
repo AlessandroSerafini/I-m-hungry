@@ -10,3 +10,15 @@ const telegramBot = require('./telegramBot');
 
 const restaurantPath = 'restaurants';
 const foodsPath = 'foods';
+
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.json());
+
+
+
+
+
+
+const server = app.listen(process.env.PORT, function () {
+    console.log("Connecting to client");
+});
