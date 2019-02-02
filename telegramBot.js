@@ -30,3 +30,7 @@ function listToMatrix(list, elementsPerSubArray) {
 function br2nl(text) {
     return text.replace(/<br\s*\/?>/mg, "\n");
 }
+
+function sendGetErrorMessage(chatId) {
+    bot.sendMessage(chatId, 'Sorry, I\'m not able to get restaurants');
+}
