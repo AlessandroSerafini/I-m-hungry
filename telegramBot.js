@@ -501,6 +501,4 @@ function deleteRestaurant(chatId, restaurantName) {
 }
 
 
-
-
 initCtaListening();
