@@ -90,6 +90,41 @@ app.get('/' + restaurantPath, async (req, res) => {
     }
 });
 
+//Create new restaurant instance
+app.put('/addRestaurant', function (req, res) {
+    try {
+        let city = req.body.city;
+        let food = req.body.food;
+        let name = req.body.name;
+
+        // Get a unique key for a new restaurant.
+        let newPostKey = firebase.database().ref().child(restaurantPath).push().key;
+
+        let referencePath = '/' + restaurantPath + '/' + newPostKey + '/';
+        let restaurantReference = firebase.database().ref(referencePath);
+        restaurantReference.set(
+            {
+                city: city,
+                food: food,
+                name: name,
+            },
+            function (err) {
+                if (err) {
+                    res.status(500)
+                        .type('application/json')
+                        .send(printResponse(false, "Data could not be saved." + err));
+                } else {
+                    res.type('application/json')
+                        .send(printResponse(true, "Data saved successfully."));
+                }
+            });
+    } catch (err) {
+        res.status(500)
+            .type('application/json')
+            .send(printResponse(false, err));
+    }
+});
+
 
 
 
