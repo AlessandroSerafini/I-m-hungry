@@ -473,6 +473,33 @@ function updateRestaurant(chatId, restaurantName, newData) {
     });
 }
 
+function deleteRestaurant(chatId, restaurantName) {
+    getRestaurants(chatId, 'name', restaurantName, true).then((restaurantId) => {
+        let options = {
+            baseUrl: 'i-am-hungry.glitch.me',
+            path: '/deleteRestaurant/' + restaurantId,
+            method: 'DELETE',
+        };
+        let isThereAnError = false;
+        webService.getJSON(options).then((res) => {
+            if (res.statusCode === 200) {
+                bot.sendMessage(chatId, 'Restaurants removed successfully! Give me five 🖐', {
+                    reply_markup: {
+                        remove_keyboard: true
+                    }
+                });
+            } else {
+                isThereAnError = true;
+            }
+        }).catch(() => {
+                isThereAnError = true;
+        });
+        if (isThereAnError) {
+            sendDeleteErrorMessage(chatId);
+        }
+    });
+}
+
 
 
 
