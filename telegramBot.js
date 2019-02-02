@@ -299,6 +299,34 @@ function handleDeleteRestaurant(chatId) {
 }
 
 
+// GET METHODS FROM GOOGLE
+
+function getPlaceId(restaurant) {
+    return new Promise((resolve, reject) => {
+        let options = {
+            baseUrl: googleApiBaseUrl,
+            path: '/maps/api/place/findplacefromtext/json?input=' + encodeURIComponent(restaurant.name + ' ' + restaurant.city) + '&inputtype=textquery&fields=place_id&key=' + googleApiKey,
+            method: 'GET',
+        };
+        webService.getJSON(options).then((res) => {
+            if (res.statusCode === 200) {
+                let candidates = res.obj.candidates;
+                if (candidates.length > 0) {
+                    let placeId = candidates[0].place_id;
+                    resolve(placeId);
+                } else {
+                    reject();
+                }
+            } else {
+                reject();
+            }
+        }).catch(() => {
+            reject();
+        });
+    });
+}
+
+
 
 
 initCtaListening();
