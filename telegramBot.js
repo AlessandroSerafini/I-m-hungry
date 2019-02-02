@@ -65,3 +65,33 @@ function formatRestaurantStars(numStars) {
     }
     return stars;
 }
+
+function sendPlaceDetailMessage(chatId, restaurants) {
+    let restaurantLabel = restaurants.length > 1 ? 'restaurants' : 'restaurant';
+    bot.sendMessage(chatId, '<b>I\'ve found ' + restaurants.length + ' ' + restaurantLabel + ' based on your criteria</b> 🍗🍟', {parse_mode: 'HTML'});
+    restaurants.forEach((restaurant) => {
+        let isThereAnError = false;
+        getPlaceId(restaurant).then((placeId) => {
+            getPlaceDetails(placeId).then((placeDetails) => {
+                let message = '<b>' + placeDetails.name + '</b><br/>';
+                let randomReviewIndex = Math.floor(Math.random() * placeDetails.reviews.length);
+                message += formatRestaurantStars(Math.round(placeDetails.rating)) + '<br/>' +
+                placeDetails.formatted_address + '<br/>___________<br/>' +
+                '<i>«' + placeDetails.reviews[randomReviewIndex].text + ' - ' + placeDetails.reviews[randomReviewIndex].author_name + '»</i>';
+                bot.sendMessage(chatId, br2nl(message), {
+                    parse_mode: 'HTML', reply_markup: {
+                        remove_keyboard: true
+                    }
+                });
+            }).catch(() => {
+                isThereAnError = true;
+            });
+        }).catch(() => {
+            isThereAnError = true;
+        });
+
+        if (isThereAnError) {
+            sendGetErrorMessage(chatId);
+        }
+    });
+}
