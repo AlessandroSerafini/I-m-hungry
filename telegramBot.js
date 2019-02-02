@@ -396,6 +396,25 @@ function getRestaurants(chatId, filterKey, filterValue, equalTo = false) {
     });
 }
 
+function getFoods() {
+    return new Promise((resolve, reject) => {
+        let options = {
+            baseUrl: 'i-am-hungry.glitch.me',
+            path: '/foods',
+            method: 'GET',
+        };
+        webService.getJSON(options).then((res) => {
+            if (res.statusCode === 200) {
+                resolve(res.obj);
+            } else {
+                reject();
+            }
+        }).catch(() => {
+            reject();
+        });
+    });
+}
+
 
 
 
