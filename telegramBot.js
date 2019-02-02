@@ -26,3 +26,7 @@ function listToMatrix(list, elementsPerSubArray) {
 
     return matrix;
 }
+
+function br2nl(text) {
+    return text.replace(/<br\s*\/?>/mg, "\n");
+}
