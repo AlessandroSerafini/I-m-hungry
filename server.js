@@ -14,6 +14,10 @@ const foodsPath = 'foods';
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+function printResponse(success = true, message = '') {
+    return {success: success, message: message}
+}
+
 
 
 
