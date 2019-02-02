@@ -209,6 +209,53 @@ function handleGetRestaurants(chatId) {
     });
 }
 
+function handleAddRestaurant(chatId, restaurantName = null) {
+    bot.sendMessage(chatId, 'Nice, what\'s the restaurant name?', {
+        reply_markup: {
+            remove_keyboard: true
+        }
+    }).then((payload) => {
+        bot.once('message', (msg) => {
+            let newRestaurantName = msg.text;
+            bot.sendMessage(chatId, 'And.. in which city can I find it?').then((payload) => {
+                bot.once('message', (msg) => {
+                    let newRestaurantCity = msg.text;
+                    getFoods().then((categories) => {
+                        let choices = [];
+                        categories.forEach((category) => {
+                            choices.push({text: category.name});
+                        });
+                        let matrix = listToMatrix(choices, 2);
+                        bot.sendMessage(chatId, 'So.. which kind of food?', {
+                            reply_markup: {
+                                keyboard: matrix
+                            }
+                        }).then((payload) => {
+                            bot.once('message', (msg) => {
+                                if (restaurantName !== null) {
+                                    updateRestaurant(chatId, restaurantName, {
+                                        name: newRestaurantName,
+                                        city: newRestaurantCity,
+                                        food: msg.text
+                                    });
+                                } else {
+                                    addRestaurant(chatId, {
+                                        name: newRestaurantName,
+                                        city: newRestaurantCity,
+                                        food: msg.text
+                                    });
+                                }
+                            });
+                        });
+                    }).catch(() => {
+                        sendGetErrorMessage(chatId);
+                    });
+                });
+            });
+        });
+    });
+}
+
 
 
 
