@@ -445,6 +445,34 @@ function addRestaurant(chatId, newRestaurant) {
     }
 }
 
+function updateRestaurant(chatId, restaurantName, newData) {
+    getRestaurants(chatId, 'name', restaurantName, true).then((restaurantId) => {
+        let options = {
+            baseUrl: 'i-am-hungry.glitch.me',
+            path: '/updateRestaurant/' + restaurantId,
+            body: JSON.stringify(newData),
+            method: 'POST',
+        };
+        let isThereAnError = false;
+        webService.getJSON(options).then((res) => {
+            if (res.statusCode === 200) {
+                bot.sendMessage(chatId, 'Restaurants update successfully! Give me five 🖐', {
+                    reply_markup: {
+                        remove_keyboard: true
+                    }
+                });
+            } else {
+                isThereAnError = true;
+            }
+        }).catch(() => {
+                isThereAnError = true;
+        });
+        if (isThereAnError) {
+            sendUpdateErrorMessage(chatId);
+        }
+    });
+}
+
 
 
 
