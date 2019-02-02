@@ -126,6 +126,34 @@ app.put('/addRestaurant', function (req, res) {
 });
 
 
+//Update existing restaurant instance
+app.post('/updateRestaurant/:id', function (req, res) {
+    let id = req.params.id;
+    let city = req.body.city;
+    let food = req.body.food;
+    let name = req.body.name;
+
+    let referencePath = '/' + restaurantPath + '/' + id + '/';
+    let restaurantReference = firebase.database().ref(referencePath);
+    restaurantReference.update(
+        {
+            city: city,
+            food: food,
+            name: name,
+        },
+        function (err) {
+            if (err) {
+                res.status(500)
+                    .type('application/json')
+                    .send(printResponse(false, "Data could not be updated." + err));
+            } else {
+                res.type('application/json')
+                    .send(printResponse(true, "Data updated successfully."));
+            }
+        });
+});
+
+
 
 
 
