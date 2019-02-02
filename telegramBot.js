@@ -54,3 +54,14 @@ function sendOtherChoiceMessage(chatId) {
         }
     });
 }
+
+function formatRestaurantStars(numStars) {
+    let stars = '';
+    for (let i = 0; i < numStars; i++) {
+        stars += '⭐️';
+    }
+    if (numStars === 5) {
+        stars += '🔝';
+    }
+    return stars;
+}
