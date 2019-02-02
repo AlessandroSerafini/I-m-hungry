@@ -153,6 +153,21 @@ app.post('/updateRestaurant/:id', function (req, res) {
         });
 });
 
+//Delete a restaurant instance
+app.delete('/deleteRestaurant/:id', function (req, res) {
+    try {
+        let id = req.params.id;
+        let referencePath = '/' + restaurantPath + '/' + id + '/';
+        let restaurantReference = firebase.database().ref(referencePath).remove();
+        res.type('application/json')
+            .send(printResponse(true, "Data deleted successfully."));
+    } catch (err) {
+        res.status(500)
+            .type('application/json')
+            .send(printResponse(false, err));
+    }
+});
+
 
 
 
