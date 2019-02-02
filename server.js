@@ -6,3 +6,5 @@ const googleApiBaseUrl = 'maps.googleapis.com';
 const googleMapsClient = require('@google/maps').createClient({
     key: googleApiKey
 });
+
+const bot = new TelegramBot(telegramConfig.token, {polling: true});
