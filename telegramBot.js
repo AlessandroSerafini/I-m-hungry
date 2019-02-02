@@ -95,3 +95,55 @@ function sendPlaceDetailMessage(chatId, restaurants) {
         }
     });
 }
+
+function initCtaListening() {
+    bot.onText(/\/start/, (msg, match) => {
+        bot.sendMessage(msg.chat.id, 'Hi! 👋 I am Alessandro Serafini\'s bot. I can show you some restaurants ' +
+            'based on certain criteria. I am also able to add, update and delete existing ' +
+            'restaurants.\n\nTest me, write me a message by typing /restaurants 🤙!' +
+            ' \n');
+        });
+        bot.onText(/\/restaurants/, (msg, match) => {
+            bot.sendMessage(msg.chat.id, 'Got it, what do you wanna do?', {
+                reply_markup: {
+                    keyboard: [[
+                        {
+                            text: 'Get restaurants',
+                        },
+                        {
+                            text: 'Add new restaurant',
+                        }],
+                        [{
+                            text: 'Update restaurant',
+                        },
+                            {
+                                text: 'Delete restaurant',
+                            }
+                        ]]
+                }
+            }).then((payload) => {
+            bot.once('message', (msg) => {
+                let chatId = payload.chat.id;
+                switch (msg.text) {
+                    case 'Get restaurants':
+                        handleGetRestaurants(chatId);
+                        break;
+                    case 'Add new restaurant':
+                        handleAddRestaurant(chatId);
+                        break;
+                    case
+                    'Update restaurant':
+                        handleUpdateRestaurant(chatId);
+                        break;
+                    case
+                    'Delete restaurant':
+                        handleDeleteRestaurant(chatId);
+                        break;
+                    default:
+                        sendOtherChoiceMessage(chatId);
+                        break;
+                }
+            });
+        });
+    });
+}
