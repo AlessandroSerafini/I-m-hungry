@@ -38,3 +38,7 @@ function sendGetErrorMessage(chatId) {
 function sendAddErrorMessage(chatId) {
     bot.sendMessage(chatId, 'Sorry, I\'m not able to add the restaurant');
 }
+
+function sendUpdateErrorMessage(chatId) {
+    bot.sendMessage(chatId, 'Sorry, I\'m not able to update the restaurant');
+}
