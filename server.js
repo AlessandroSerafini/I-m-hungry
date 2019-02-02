@@ -1,10 +1,12 @@
-const TelegramBot = require('node-telegram-bot-api');
-const telegramConfig = require("./telegramConfig");
-const webService = require("./webService");
-const googleApiKey = 'AIzaSyBtIQBtYgekv6YnUfXFGK3La0vm6armidQ';
-const googleApiBaseUrl = 'maps.googleapis.com';
-const googleMapsClient = require('@google/maps').createClient({
-    key: googleApiKey
-});
+const express = require('express');
+const app = express();
 
-const bot = new TelegramBot(telegramConfig.token, {polling: true});
+const bodyParser = require('body-parser');
+
+const firebase = require('firebase');
+const admin = require('./firebaseConfig');
+
+const telegramBot = require('./telegramBot');
+
+const restaurantPath = 'restaurants';
+const foodsPath = 'foods';
