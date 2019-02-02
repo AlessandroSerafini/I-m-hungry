@@ -346,6 +346,57 @@ function getPlaceDetails(placeId) {
 }
 
 
+// GET METHODS
+
+function getRestaurants(chatId, filterKey, filterValue, equalTo = false) {
+    return new Promise((resolve, reject) => {
+        //TODO: il messaggio di errore non sta venendo mandato
+        let path = '/restaurants';
+        switch (filterKey) {
+            case 'food':
+                path += '?food=' + filterValue;
+                break;
+            case 'name':
+                path += '?name=' + encodeURIComponent(filterValue);
+                if (equalTo) {
+                    path += '&equalTo=1';
+                }
+                break;
+            default:
+                break;
+        }
+        let options = {
+            baseUrl: 'i-am-hungry.glitch.me',
+            path: path,
+            method: 'GET',
+        };
+        let isThereAnError = false;
+        webService.getJSON(options).then((res) => {
+            if (res.statusCode === 200) {
+                let restaurants = res.obj;
+                if (restaurants.length > 0) {
+                    resolve(restaurants);
+                } else {
+                    bot.sendMessage(chatId, 'I\'m sorry, I didn\'t found any restaurant 😔', {
+                        reply_markup: {
+                            remove_keyboard: true
+                        }
+                    });
+                }
+            } else {
+                isThereAnError = true;
+            }
+        }).catch(() => {
+            isThereAnError = true;
+        });
+        if (isThereAnError) {
+            sendGetErrorMessage(chatId);
+            reject();
+        }
+    });
+}
+
+
 
 
 initCtaListening();
