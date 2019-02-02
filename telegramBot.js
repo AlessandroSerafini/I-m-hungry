@@ -277,6 +277,27 @@ function handleUpdateRestaurant(chatId) {
     });
 }
 
+function handleDeleteRestaurant(chatId) {
+    getRestaurants(chatId).then((restaurants) => {
+        let choices = [];
+        restaurants.forEach((restaurant) => {
+            choices.push({
+                text: restaurant.name,
+            });
+        });
+        let matrix = listToMatrix(choices, 2);
+        bot.sendMessage(chatId, 'Nice, what\'s the restaurant name you want delete?', {
+            reply_markup: {
+                keyboard: matrix
+            }
+        }).then((payload) => {
+            bot.once('message', (msg) => {
+                deleteRestaurant(chatId, msg.text);
+            });
+        });
+    });
+}
+
 
 
 
