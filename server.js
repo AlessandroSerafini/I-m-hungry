@@ -14,6 +14,13 @@ const foodsPath = 'foods';
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
+
 function printResponse(success = true, message = '') {
     return {success: success, message: message}
 }
@@ -30,22 +37,22 @@ app.get('/' + foodsPath, async (req, res) => {
         let foodsReference = firebase.database().ref("/" + foodsPath + "/");
         //Attach an asynchronous callback to read the data
         foodsReference.on("value",
-        function (snapshot) {
-            let foods = [];
-            snapshot.forEach(function (item) {
-                foods.push(item.val());
+            function (snapshot) {
+                let foods = [];
+                snapshot.forEach(function (item) {
+                    foods.push(item.val());
+                });
+                res.json(foods);
+                foodsReference.off("value");
+            },
+            function (errorObject) {
+                res.type('application/json')
+                    .send(printResponse(false, "The read failed: " + errorObject.code));
             });
-            res.json(foods);
-            foodsReference.off("value");
-        },
-        function (errorObject) {
-            res.type('application/json')
-                .send(printResponse(false, "The read failed: " + errorObject.code));
-        });
     } catch (err) {
         res.status(500)
-        .type('application/json')
-        .send(printResponse(false, err));
+            .type('application/json')
+            .send(printResponse(false, err));
     }
 });
 
@@ -53,36 +60,46 @@ app.get('/' + foodsPath, async (req, res) => {
 app.get('/' + restaurantPath, async (req, res) => {
     try {
         let restaurantReference = firebase.database().ref("/" + restaurantPath + "/");
+
         if (req.query.food) {
             restaurantReference = restaurantReference.orderByChild("food").equalTo(req.query.food);
         }
-        if (req.query.equalTo) {
-            restaurantReference = restaurantReference.orderByChild("name").equalTo(req.query.name);
-        }
         //Attach an asynchronous callback to read the data
         restaurantReference.on("value",
-        function (snapshot) {
-            let restaurants = [];
-            snapshot.forEach(function (item) {
-                if (req.query.name) {
-                    if (req.query.equalTo) {
-                        restaurants.push(Object.keys(snapshot.val())[0]);
-                    } else {
-                        if (item.val().name.toLowerCase().includes(req.query.name.toLowerCase())) {
-                            restaurants.push(item.val());
+            function (snapshots) {
+                let restaurants = [];
+
+                for (var k in snapshots.val()) {
+                    if (snapshots.val().hasOwnProperty(k)) {
+
+                        if (req.query.name) {
+                            if (snapshots.val()[k].name.toLowerCase().includes(req.query.name.toLowerCase())) {
+                                restaurants.push({
+                                    id: k,
+                                    city: snapshots.val()[k].city,
+                                    food: snapshots.val()[k].food,
+                                    name: snapshots.val()[k].name
+                                });
+                            }
+                        } else {
+                            restaurants.push({
+                                id: k,
+                                city: snapshots.val()[k].city,
+                                food: snapshots.val()[k].food,
+                                name: snapshots.val()[k].name
+                            });
                         }
+
+
                     }
-                } else {
-                    restaurants.push(item.val());
                 }
+                res.json(restaurants);
+                restaurantReference.off("value");
+            },
+            function (errorObject) {
+                res.type('application/json')
+                    .send(printResponse(false, "The read failed: " + errorObject.code));
             });
-            res.json(restaurants);
-            restaurantReference.off("value");
-        },
-        function (errorObject) {
-            res.type('application/json')
-                .send(printResponse(false, "The read failed: " + errorObject.code));
-        });
     } catch (err) {
         res.status(500)
             .type('application/json')
@@ -125,7 +142,6 @@ app.put('/addRestaurant', function (req, res) {
     }
 });
 
-
 //Update existing restaurant instance
 app.post('/updateRestaurant/:id', function (req, res) {
     let id = req.params.id;
@@ -167,6 +183,7 @@ app.delete('/deleteRestaurant/:id', function (req, res) {
             .send(printResponse(false, err));
     }
 });
+
 
 const server = app.listen(process.env.PORT, function () {
     console.log("Connecting to client");
