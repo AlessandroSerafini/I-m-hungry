@@ -107,6 +107,36 @@ app.get('/' + restaurantPath, async (req, res) => {
     }
 });
 
+//Fetch restaurant instance
+app.get('/' + restaurantPath + '/:id', function (req, res) {
+    try {
+        let id = req.params.id;
+        let referencePath = '/' + restaurantPath + '/' + id + '/';
+        let restaurantReference = firebase.database().ref(referencePath);
+
+        //Attach an asynchronous callback to read the data
+        restaurantReference.on("value",
+            function (snapshots) {
+                res.json({
+                    id: id,
+                    city: snapshots.val().city,
+                    food: snapshots.val().food,
+                    name: snapshots.val().name
+                });
+                restaurantReference.off("value");
+            },
+            function (errorObject) {
+                res.type('application/json')
+                    .send(printResponse(false, "The read failed: " + errorObject.code));
+            });
+
+    } catch (err) {
+        res.status(500)
+            .type('application/json')
+            .send(printResponse(false, err));
+    }
+});
+
 //Create new restaurant instance
 app.put('/addRestaurant', function (req, res) {
     try {
