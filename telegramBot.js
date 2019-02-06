@@ -303,16 +303,20 @@ function handleDeleteRestaurant(chatId) {
         restaurants.forEach((restaurant) => {
             choices.push({
                 text: restaurant.name,
+                callback_data: restaurant.id
             });
         });
         let matrix = listToMatrix(choices, 2);
         bot.sendMessage(chatId, 'Nice, what\'s the restaurant name you want delete?', {
             reply_markup: {
-                keyboard: matrix
+                inline_keyboard: matrix
             }
         }).then((payload) => {
-            bot.once('message', (msg) => {
-                deleteRestaurant(chatId, msg.text);
+            bot.once("callback_query", function onCallbackQuery(callbackQuery) {
+                return bot.deleteMessage(payload.chat.id, payload.message_id).then(resp => {
+                    let restaurantId = callbackQuery.data;
+                    deleteRestaurant(chatId, restaurantId);
+                });
             });
         });
     });
@@ -487,31 +491,29 @@ function updateRestaurant(chatId, restaurantId, newData) {
     }
 }
 
-function deleteRestaurant(chatId, restaurantName) {
-    getRestaurants(chatId, 'name', restaurantName, true).then((restaurantId) => {
-        let options = {
-            baseUrl: 'i-am-hungry.glitch.me',
-            path: '/deleteRestaurant/' + restaurantId,
-            method: 'DELETE',
-        };
-        let isThereAnError = false;
-        webService.getJSON(options).then((res) => {
-            if (res.statusCode === 200) {
-                bot.sendMessage(chatId, 'Restaurants removed successfully! Give me five 🖐', {
-                    reply_markup: {
-                        remove_keyboard: true
-                    }
-                });
-            } else {
-                isThereAnError = true;
-            }
-        }).catch(() => {
+function deleteRestaurant(chatId, restaurantId) {
+    let options = {
+        baseUrl: 'i-am-hungry.glitch.me',
+        path: '/deleteRestaurant/' + restaurantId,
+        method: 'DELETE',
+    };
+    let isThereAnError = false;
+    webService.getJSON(options).then((res) => {
+        if (res.statusCode === 200) {
+            bot.sendMessage(chatId, 'Restaurants removed successfully! Give me five 🖐', {
+                reply_markup: {
+                    remove_keyboard: true
+                }
+            });
+        } else {
             isThereAnError = true;
-        });
-        if (isThereAnError) {
-            sendDeleteErrorMessage(chatId);
         }
+    }).catch(() => {
+        isThereAnError = true;
     });
+    if (isThereAnError) {
+        sendDeleteErrorMessage(chatId);
+    }
 }
 
 
