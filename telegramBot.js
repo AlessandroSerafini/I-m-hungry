@@ -32,19 +32,35 @@ function br2nl(text) {
 }
 
 function sendGetErrorMessage(chatId) {
-    bot.sendMessage(chatId, 'Sorry, I\'m not able to get restaurants');
+    bot.sendMessage(chatId, 'Sorry, I\'m not able to get restaurants', {
+        reply_markup: {
+            remove_keyboard: true
+        }
+    });
 }
 
 function sendAddErrorMessage(chatId) {
-    bot.sendMessage(chatId, 'Sorry, I\'m not able to add the restaurant');
+    bot.sendMessage(chatId, 'Sorry, I\'m not able to add the restaurant', {
+        reply_markup: {
+            remove_keyboard: true
+        }
+    });
 }
 
 function sendUpdateErrorMessage(chatId) {
-    bot.sendMessage(chatId, 'Sorry, I\'m not able to update the restaurant');
+    bot.sendMessage(chatId, 'Sorry, I\'m not able to update the restaurant', {
+        reply_markup: {
+            remove_keyboard: true
+        }
+    });
 }
 
 function sendDeleteErrorMessage(chatId) {
-    bot.sendMessage(chatId, 'Sorry, I\'m not able to delete the restaurant');
+    bot.sendMessage(chatId, 'Sorry, I\'m not able to delete the restaurant', {
+        reply_markup: {
+            remove_keyboard: true
+        }
+    });
 }
 
 function sendOtherChoiceMessage(chatId) {
@@ -76,8 +92,8 @@ function sendPlaceDetailMessage(chatId, restaurants) {
                 let message = '<b>' + placeDetails.name + '</b><br/>';
                 let randomReviewIndex = Math.floor(Math.random() * placeDetails.reviews.length);
                 message += formatRestaurantStars(Math.round(placeDetails.rating)) + '<br/>' +
-                placeDetails.formatted_address + '<br/>___________<br/>' +
-                '<i>«' + placeDetails.reviews[randomReviewIndex].text + ' - ' + placeDetails.reviews[randomReviewIndex].author_name + '»</i>';
+                    placeDetails.formatted_address + '<br/>___________<br/>' +
+                    '<i>«' + placeDetails.reviews[randomReviewIndex].text + ' - ' + placeDetails.reviews[randomReviewIndex].author_name + '»</i>';
                 bot.sendMessage(chatId, br2nl(message), {
                     parse_mode: 'HTML', reply_markup: {
                         remove_keyboard: true
@@ -102,26 +118,26 @@ function initCtaListening() {
             'based on certain criteria. I am also able to add, update and delete existing ' +
             'restaurants.\n\nTest me, write me a message by typing /restaurants 🤙!' +
             ' \n');
-        });
-        bot.onText(/\/restaurants/, (msg, match) => {
-            bot.sendMessage(msg.chat.id, 'Got it, what do you wanna do?', {
-                reply_markup: {
-                    keyboard: [[
+    });
+    bot.onText(/\/restaurants/, (msg, match) => {
+        bot.sendMessage(msg.chat.id, 'Got it, what do you wanna do?', {
+            reply_markup: {
+                keyboard: [[
+                    {
+                        text: 'Get restaurants',
+                    },
+                    {
+                        text: 'Add new restaurant',
+                    }],
+                    [{
+                        text: 'Update restaurant',
+                    },
                         {
-                            text: 'Get restaurants',
-                        },
-                        {
-                            text: 'Add new restaurant',
-                        }],
-                        [{
-                            text: 'Update restaurant',
-                        },
-                            {
-                                text: 'Delete restaurant',
-                            }
-                        ]]
-                }
-            }).then((payload) => {
+                            text: 'Delete restaurant',
+                        }
+                    ]]
+            }
+        }).then((payload) => {
             bot.once('message', (msg) => {
                 let chatId = payload.chat.id;
                 switch (msg.text) {
@@ -187,7 +203,7 @@ function handleGetRestaurants(chatId) {
                     }).catch(() => {
                         sendGetErrorMessage(chatId);
                     });
-                break;
+                    break;
                 case 'By name':
                     bot.sendMessage(chatId, 'So.. What\'s the restaurant name?', {
                         reply_markup: {
@@ -200,16 +216,16 @@ function handleGetRestaurants(chatId) {
                             });
                         });
                     });
-                break;
+                    break;
                 default:
                     sendOtherChoiceMessage(chatId);
-                break;
+                    break;
             }
         });
     });
 }
 
-function handleAddRestaurant(chatId, restaurantName = null) {
+function handleAddRestaurant(chatId, restaurantId = null) {
     bot.sendMessage(chatId, 'Nice, what\'s the restaurant name?', {
         reply_markup: {
             remove_keyboard: true
@@ -232,8 +248,8 @@ function handleAddRestaurant(chatId, restaurantName = null) {
                             }
                         }).then((payload) => {
                             bot.once('message', (msg) => {
-                                if (restaurantName !== null) {
-                                    updateRestaurant(chatId, restaurantName, {
+                                if (restaurantId !== null) {
+                                    updateRestaurant(chatId, restaurantId, {
                                         name: newRestaurantName,
                                         city: newRestaurantCity,
                                         food: msg.text
@@ -262,16 +278,20 @@ function handleUpdateRestaurant(chatId) {
         restaurants.forEach((restaurant) => {
             choices.push({
                 text: restaurant.name,
+                callback_data: restaurant.id
             });
         });
         let matrix = listToMatrix(choices, 2);
-        bot.sendMessage(chatId, 'Nice, what\'s the restaurant name you want update?', {
+        bot.sendMessage(chatId, 'Nice, what\'s the restaurant you want update?', {
             reply_markup: {
-                keyboard: matrix
+                inline_keyboard: matrix
             }
         }).then((payload) => {
-            bot.once('message', (msg) => {
-                handleAddRestaurant(chatId, msg.text)
+            bot.once("callback_query", function onCallbackQuery(callbackQuery) {
+                return bot.deleteMessage(payload.chat.id, payload.message_id).then(resp => {
+                    let restaurantId = callbackQuery.data;
+                    handleAddRestaurant(chatId, restaurantId);
+                });
             });
         });
     });
@@ -348,7 +368,7 @@ function getPlaceDetails(placeId) {
 
 // GET METHODS
 
-function getRestaurants(chatId, filterKey, filterValue, equalTo = false) {
+function getRestaurants(chatId, filterKey, filterValue) {
     return new Promise((resolve, reject) => {
         let path = '/restaurants';
         switch (filterKey) {
@@ -357,9 +377,6 @@ function getRestaurants(chatId, filterKey, filterValue, equalTo = false) {
                 break;
             case 'name':
                 path += '?name=' + encodeURIComponent(filterValue);
-                if (equalTo) {
-                    path += '&equalTo=1';
-                }
                 break;
             default:
                 break;
@@ -436,7 +453,7 @@ function addRestaurant(chatId, newRestaurant) {
             isThereAnError = true;
         }
     }).catch(() => {
-            isThereAnError = true;
+        isThereAnError = true;
     });
 
     if (isThereAnError) {
@@ -444,32 +461,30 @@ function addRestaurant(chatId, newRestaurant) {
     }
 }
 
-function updateRestaurant(chatId, restaurantName, newData) {
-    getRestaurants(chatId, 'name', restaurantName, true).then((restaurantId) => {
-        let options = {
-            baseUrl: 'i-am-hungry.glitch.me',
-            path: '/updateRestaurant/' + restaurantId,
-            body: JSON.stringify(newData),
-            method: 'POST',
-        };
-        let isThereAnError = false;
-        webService.getJSON(options).then((res) => {
-            if (res.statusCode === 200) {
-                bot.sendMessage(chatId, 'Restaurants update successfully! Give me five 🖐', {
-                    reply_markup: {
-                        remove_keyboard: true
-                    }
-                });
-            } else {
-                isThereAnError = true;
-            }
-        }).catch(() => {
-                isThereAnError = true;
-        });
-        if (isThereAnError) {
-            sendUpdateErrorMessage(chatId);
+function updateRestaurant(chatId, restaurantId, newData) {
+    let options = {
+        baseUrl: 'i-am-hungry.glitch.me',
+        path: '/updateRestaurant/' + restaurantId,
+        body: JSON.stringify(newData),
+        method: 'POST',
+    };
+    let isThereAnError = false;
+    webService.getJSON(options).then((res) => {
+        if (res.statusCode === 200) {
+            bot.sendMessage(chatId, 'Restaurants update successfully! Give me five 🖐', {
+                reply_markup: {
+                    remove_keyboard: true
+                }
+            });
+        } else {
+            isThereAnError = true;
         }
+    }).catch(() => {
+        isThereAnError = true;
     });
+    if (isThereAnError) {
+        sendUpdateErrorMessage(chatId);
+    }
 }
 
 function deleteRestaurant(chatId, restaurantName) {
@@ -491,7 +506,7 @@ function deleteRestaurant(chatId, restaurantName) {
                 isThereAnError = true;
             }
         }).catch(() => {
-                isThereAnError = true;
+            isThereAnError = true;
         });
         if (isThereAnError) {
             sendDeleteErrorMessage(chatId);
