@@ -148,6 +148,24 @@ app.get('/logout', (req, res) => {
     }
 });
 
+//Check if i'm logged in
+function attemptAuth(req, res) {
+    console.log("Cookies: " + JSON.stringify(req.cookies));
+
+    if(req.cookies.logintoken == secretCookieValue) {
+        return true;
+    }
+
+    if(req.query.username && req.query.password) {
+        if(req.query.username == 'root' && req.query.password == 'root') {
+            res.cookie('logintoken', secretCookieValue);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 //Fetch restaurant instance
 app.get('/' + restaurantPath + '/:id', function (req, res) {
     try {
