@@ -135,7 +135,8 @@ app.get('/login', (req, res) => {
         }
 
         // Login error
-        res.type('application/json')
+        res.status(500)
+            .type('application/json')
             .send(printResponse(false, 'Login failed'));
         return;
     } catch (err) {
