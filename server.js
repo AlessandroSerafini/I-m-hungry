@@ -137,6 +137,17 @@ app.get('/login', (req, res) => {
     }
 });
 
+//Sign out
+app.get('/logout', (req, res) => {
+    try {
+        res.clearCookie('logintoken').send(printResponse(true, 'You are logged out'));
+    } catch (err) {
+        res.status(500)
+            .type('application/json')
+            .send(printResponse(false, err.message));
+    }
+});
+
 //Fetch restaurant instance
 app.get('/' + restaurantPath + '/:id', function (req, res) {
     try {
