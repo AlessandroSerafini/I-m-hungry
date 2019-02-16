@@ -45,25 +45,25 @@ app.get('/', function (req, res) {
 app.get('/' + foodsPath, async(req, res) => {
     try {
         let foodsReference = firebase.database().ref("/" + foodsPath + "/");
-//Attach an asynchronous callback to read the data
-foodsReference.on("value",
-    function (snapshot) {
-        let foods = [];
-        snapshot.forEach(function (item) {
-            foods.push(item.val());
+        //Attach an asynchronous callback to read the data
+        foodsReference.on("value",
+        function (snapshot) {
+            let foods = [];
+            snapshot.forEach(function (item) {
+                foods.push(item.val());
+            });
+            res.json(foods);
+            foodsReference.off("value");
+        },
+        function (errorObject) {
+            res.type('application/json')
+                .send(printResponse(false, "The read failed: " + errorObject.code));
         });
-        res.json(foods);
-        foodsReference.off("value");
-    },
-    function (errorObject) {
-        res.type('application/json')
-            .send(printResponse(false, "The read failed: " + errorObject.code));
-    });
-} catch (err) {
-    res.status(500)
-        .type('application/json')
-        .send(printResponse(false, err.message));
-}
+    } catch (err) {
+        res.status(500)
+            .type('application/json')
+            .send(printResponse(false, err.message));
+    }
 });
 
 //Fetch restaurants instances
@@ -71,19 +71,27 @@ app.get('/' + restaurantPath, async(req, res) => {
     try {
         let restaurantReference = firebase.database().ref("/" + restaurantPath + "/");
 
-if (req.query.food) {
-    restaurantReference = restaurantReference.orderByChild("food").equalTo(req.query.food);
-}
-//Attach an asynchronous callback to read the data
-restaurantReference.on("value",
-    function (snapshots) {
-        let restaurants = [];
+    if (req.query.food) {
+        restaurantReference = restaurantReference.orderByChild("food").equalTo(req.query.food);
+    }
+    //Attach an asynchronous callback to read the data
+    restaurantReference.on("value",
+        function (snapshots) {
+            let restaurants = [];
 
-        for (var k in snapshots.val()) {
-            if (snapshots.val().hasOwnProperty(k)) {
+            for (var k in snapshots.val()) {
+                if (snapshots.val().hasOwnProperty(k)) {
 
-                if (req.query.name) {
-                    if (snapshots.val()[k].name.toLowerCase().includes(req.query.name.toLowerCase())) {
+                    if (req.query.name) {
+                        if (snapshots.val()[k].name.toLowerCase().includes(req.query.name.toLowerCase())) {
+                            restaurants.push({
+                                id: k,
+                                city: snapshots.val()[k].city,
+                                food: snapshots.val()[k].food,
+                                name: snapshots.val()[k].name
+                            });
+                        }
+                    } else {
                         restaurants.push({
                             id: k,
                             city: snapshots.val()[k].city,
@@ -91,30 +99,22 @@ restaurantReference.on("value",
                             name: snapshots.val()[k].name
                         });
                     }
-                } else {
-                    restaurants.push({
-                        id: k,
-                        city: snapshots.val()[k].city,
-                        food: snapshots.val()[k].food,
-                        name: snapshots.val()[k].name
-                    });
+
+
                 }
-
-
             }
-        }
-        res.json(restaurants);
-        restaurantReference.off("value");
-    },
-    function (errorObject) {
-        res.type('application/json')
-            .send(printResponse(false, "The read failed: " + errorObject.code));
-    });
-} catch (err) {
-    res.status(500)
-        .type('application/json')
-        .send(printResponse(false, err.message));
-}
+            res.json(restaurants);
+            restaurantReference.off("value");
+        },
+        function (errorObject) {
+            res.type('application/json')
+                .send(printResponse(false, "The read failed: " + errorObject.code));
+        });
+    } catch (err) {
+        res.status(500)
+            .type('application/json')
+            .send(printResponse(false, err.message));
+    }
 });
 
 //Sign in
@@ -199,30 +199,37 @@ app.get('/' + restaurantPath + '/:id', function (req, res) {
 //Create new restaurant instance
 app.put('/addRestaurant', function (req, res) {
     try {
-        let city = req.body.city;
-        let food = req.body.food;
-        let name = req.body.name;
+        if (attemptAuth(req, res)) {
+            let city = req.body.city;
+            let food = req.body.food;
+            let name = req.body.name;
 
-        // Get a unique key for a new restaurant.
-        let newPostKey = firebase.database().ref().child(restaurantPath).push().key;
+            // Get a unique key for a new restaurant.
+            let newPostKey = firebase.database().ref().child(restaurantPath).push().key;
 
-        let referencePath = '/' + restaurantPath + '/' + newPostKey + '/';
-        let restaurantReference = firebase.database().ref(referencePath);
-        restaurantReference.set({
-                city: city,
-                food: food,
-                name: name,
-            },
-            function (err) {
-                if (err) {
-                    res.status(500)
-                        .type('application/json')
-                        .send(printResponse(false, "Data could not be saved." + err.message));
-                } else {
-                    res.type('application/json')
-                        .send(printResponse(true, "Data saved successfully."));
-                }
-            });
+            let referencePath = '/' + restaurantPath + '/' + newPostKey + '/';
+            let restaurantReference = firebase.database().ref(referencePath);
+            restaurantReference.set({
+                    city: city,
+                    food: food,
+                    name: name,
+                },
+                function (err) {
+                    if (err) {
+                        res.status(500)
+                            .type('application/json')
+                            .send(printResponse(false, "Data could not be saved." + err.message));
+                    } else {
+                        res.type('application/json')
+                            .send(printResponse(true, "Data saved successfully."));
+                    }
+                });
+            return;
+        }
+        res.status(403)
+            .type('application/json')
+            .send(printResponse(false, 'Login is required'));
+
     } catch (err) {
         res.status(500)
             .type('application/json')
@@ -232,38 +239,54 @@ app.put('/addRestaurant', function (req, res) {
 
 //Update existing restaurant instance
 app.post('/updateRestaurant/:id', function (req, res) {
-    let id = req.params.id;
-    let city = req.body.city;
-    let food = req.body.food;
-    let name = req.body.name;
+    try {
+        if (attemptAuth(req, res)) {
+            let id = req.params.id;
+            let city = req.body.city;
+            let food = req.body.food;
+            let name = req.body.name;
 
-    let referencePath = '/' + restaurantPath + '/' + id + '/';
-    let restaurantReference = firebase.database().ref(referencePath);
-    restaurantReference.update({
-            city: city,
-            food: food,
-            name: name,
-        },
-        function (err) {
-            if (err) {
-                res.status(500)
-                    .type('application/json')
-                    .send(printResponse(false, "Data could not be updated." + err.message));
-            } else {
-                res.type('application/json')
-                    .send(printResponse(true, "Data updated successfully."));
-            }
-        });
+            let referencePath = '/' + restaurantPath + '/' + id + '/';
+            let restaurantReference = firebase.database().ref(referencePath);
+            restaurantReference.update({
+                    city: city,
+                    food: food,
+                    name: name,
+                },
+            function (err) {
+                if (err) {
+                    res.status(500)
+                        .type('application/json')
+                        .send(printResponse(false, "Data could not be updated." + err.message));
+                } else {
+                    res.type('application/json')
+                        .send(printResponse(true, "Data updated successfully."));
+                }
+            });
+        }
+        res.status(403)
+            .type('application/json')
+            .send(printResponse(false, 'Login is required'));
+    } catch (err) {
+        res.status(500)
+            .type('application/json')
+            .send(printResponse(false, err.message));
+    }
 });
 
 //Delete a restaurant instance
 app.delete('/deleteRestaurant/:id', function (req, res) {
     try {
-        let id = req.params.id;
-        let referencePath = '/' + restaurantPath + '/' + id + '/';
-        let restaurantReference = firebase.database().ref(referencePath).remove();
-        res.type('application/json')
-            .send(printResponse(true, "Data deleted successfully."));
+        if (attemptAuth(req, res)) {
+            let id = req.params.id;
+            let referencePath = '/' + restaurantPath + '/' + id + '/';
+            let restaurantReference = firebase.database().ref(referencePath).remove();
+            res.type('application/json')
+                .send(printResponse(true, "Data deleted successfully."));
+        }
+        res.status(403)
+            .type('application/json')
+            .send(printResponse(false, 'Login is required'));
     } catch (err) {
         res.status(500)
             .type('application/json')
