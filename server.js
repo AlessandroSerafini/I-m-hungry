@@ -11,7 +11,14 @@ const telegramBot = require('./telegramBot');
 const restaurantPath = 'restaurants';
 const foodsPath = 'foods';
 
-app.use(bodyParser.urlencoded({extended: false}));
+const secretCookieValue = '.yV[%#hK9z>X8GnxEA;.7LTA';
+
+const cookieparser = require('cookie-parser');
+app.use(cookieparser());
+
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 app.use(bodyParser.json());
 
 app.use(function (req, res, next) {
@@ -22,7 +29,10 @@ app.use(function (req, res, next) {
 
 
 function printResponse(success = true, message = '') {
-    return {success: success, message: message}
+    return {
+        success: success,
+        message: message
+    }
 }
 
 // Root path: prints short instructions
@@ -32,78 +42,98 @@ app.get('/', function (req, res) {
 });
 
 //Fetch foods instances
-app.get('/' + foodsPath, async (req, res) => {
+app.get('/' + foodsPath, async(req, res) => {
     try {
         let foodsReference = firebase.database().ref("/" + foodsPath + "/");
-        //Attach an asynchronous callback to read the data
-        foodsReference.on("value",
-            function (snapshot) {
-                let foods = [];
-                snapshot.forEach(function (item) {
-                    foods.push(item.val());
-                });
-                res.json(foods);
-                foodsReference.off("value");
-            },
-            function (errorObject) {
-                res.type('application/json')
-                    .send(printResponse(false, "The read failed: " + errorObject.code));
-            });
-    } catch (err) {
-        res.status(500)
-            .type('application/json')
-            .send(printResponse(false, err));
-    }
+//Attach an asynchronous callback to read the data
+foodsReference.on("value",
+    function (snapshot) {
+        let foods = [];
+        snapshot.forEach(function (item) {
+            foods.push(item.val());
+        });
+        res.json(foods);
+        foodsReference.off("value");
+    },
+    function (errorObject) {
+        res.type('application/json')
+            .send(printResponse(false, "The read failed: " + errorObject.code));
+    });
+} catch (err) {
+    res.status(500)
+        .type('application/json')
+        .send(printResponse(false, err.message));
+}
 });
 
 //Fetch restaurants instances
-app.get('/' + restaurantPath, async (req, res) => {
+app.get('/' + restaurantPath, async(req, res) => {
     try {
         let restaurantReference = firebase.database().ref("/" + restaurantPath + "/");
 
-        if (req.query.food) {
-            restaurantReference = restaurantReference.orderByChild("food").equalTo(req.query.food);
-        }
-        //Attach an asynchronous callback to read the data
-        restaurantReference.on("value",
-            function (snapshots) {
-                let restaurants = [];
+if (req.query.food) {
+    restaurantReference = restaurantReference.orderByChild("food").equalTo(req.query.food);
+}
+//Attach an asynchronous callback to read the data
+restaurantReference.on("value",
+    function (snapshots) {
+        let restaurants = [];
 
-                for (var k in snapshots.val()) {
-                    if (snapshots.val().hasOwnProperty(k)) {
+        for (var k in snapshots.val()) {
+            if (snapshots.val().hasOwnProperty(k)) {
 
-                        if (req.query.name) {
-                            if (snapshots.val()[k].name.toLowerCase().includes(req.query.name.toLowerCase())) {
-                                restaurants.push({
-                                    id: k,
-                                    city: snapshots.val()[k].city,
-                                    food: snapshots.val()[k].food,
-                                    name: snapshots.val()[k].name
-                                });
-                            }
-                        } else {
-                            restaurants.push({
-                                id: k,
-                                city: snapshots.val()[k].city,
-                                food: snapshots.val()[k].food,
-                                name: snapshots.val()[k].name
-                            });
-                        }
-
-
+                if (req.query.name) {
+                    if (snapshots.val()[k].name.toLowerCase().includes(req.query.name.toLowerCase())) {
+                        restaurants.push({
+                            id: k,
+                            city: snapshots.val()[k].city,
+                            food: snapshots.val()[k].food,
+                            name: snapshots.val()[k].name
+                        });
                     }
+                } else {
+                    restaurants.push({
+                        id: k,
+                        city: snapshots.val()[k].city,
+                        food: snapshots.val()[k].food,
+                        name: snapshots.val()[k].name
+                    });
                 }
-                res.json(restaurants);
-                restaurantReference.off("value");
-            },
-            function (errorObject) {
-                res.type('application/json')
-                    .send(printResponse(false, "The read failed: " + errorObject.code));
-            });
+
+
+            }
+        }
+        res.json(restaurants);
+        restaurantReference.off("value");
+    },
+    function (errorObject) {
+        res.type('application/json')
+            .send(printResponse(false, "The read failed: " + errorObject.code));
+    });
+} catch (err) {
+    res.status(500)
+        .type('application/json')
+        .send(printResponse(false, err.message));
+}
+});
+
+//Sign in
+app.get('/login', (req, res) => {
+    try {
+        if (attemptAuth(req, res)) {
+            // Login successfully
+            res.type('application/json')
+                .send(printResponse(true, 'Login successfully'));
+            return;
+        }
+
+        // Login error
+        res.type('application/json')
+            .send(printResponse(false, 'Login failed'));
     } catch (err) {
         res.status(500)
             .type('application/json')
-            .send(printResponse(false, err));
+            .send(printResponse(false, err.message));
     }
 });
 
@@ -133,7 +163,7 @@ app.get('/' + restaurantPath + '/:id', function (req, res) {
     } catch (err) {
         res.status(500)
             .type('application/json')
-            .send(printResponse(false, err));
+            .send(printResponse(false, err.message));
     }
 });
 
@@ -149,8 +179,7 @@ app.put('/addRestaurant', function (req, res) {
 
         let referencePath = '/' + restaurantPath + '/' + newPostKey + '/';
         let restaurantReference = firebase.database().ref(referencePath);
-        restaurantReference.set(
-            {
+        restaurantReference.set({
                 city: city,
                 food: food,
                 name: name,
@@ -159,7 +188,7 @@ app.put('/addRestaurant', function (req, res) {
                 if (err) {
                     res.status(500)
                         .type('application/json')
-                        .send(printResponse(false, "Data could not be saved." + err));
+                        .send(printResponse(false, "Data could not be saved." + err.message));
                 } else {
                     res.type('application/json')
                         .send(printResponse(true, "Data saved successfully."));
@@ -168,7 +197,7 @@ app.put('/addRestaurant', function (req, res) {
     } catch (err) {
         res.status(500)
             .type('application/json')
-            .send(printResponse(false, err));
+            .send(printResponse(false, err.message));
     }
 });
 
@@ -181,8 +210,7 @@ app.post('/updateRestaurant/:id', function (req, res) {
 
     let referencePath = '/' + restaurantPath + '/' + id + '/';
     let restaurantReference = firebase.database().ref(referencePath);
-    restaurantReference.update(
-        {
+    restaurantReference.update({
             city: city,
             food: food,
             name: name,
@@ -191,7 +219,7 @@ app.post('/updateRestaurant/:id', function (req, res) {
             if (err) {
                 res.status(500)
                     .type('application/json')
-                    .send(printResponse(false, "Data could not be updated." + err));
+                    .send(printResponse(false, "Data could not be updated." + err.message));
             } else {
                 res.type('application/json')
                     .send(printResponse(true, "Data updated successfully."));
@@ -210,7 +238,7 @@ app.delete('/deleteRestaurant/:id', function (req, res) {
     } catch (err) {
         res.status(500)
             .type('application/json')
-            .send(printResponse(false, err));
+            .send(printResponse(false, err.message));
     }
 });
 
