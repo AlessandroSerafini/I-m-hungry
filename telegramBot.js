@@ -441,7 +441,7 @@ function getFoods() {
 function addRestaurant(chatId, newRestaurant) {
     let options = {
         baseUrl: 'i-am-hungry.glitch.me',
-        path: '/addRestaurant',
+        path: '/addRestaurant' + '?bot=true',
         body: JSON.stringify(newRestaurant),
         method: 'PUT',
     };
@@ -466,6 +466,7 @@ function addRestaurant(chatId, newRestaurant) {
 }
 
 function updateRestaurant(chatId, restaurantId, newData) {
+    newData.bot = true;
     let options = {
         baseUrl: 'i-am-hungry.glitch.me',
         path: '/updateRestaurant/' + restaurantId,
@@ -494,7 +495,7 @@ function updateRestaurant(chatId, restaurantId, newData) {
 function deleteRestaurant(chatId, restaurantId) {
     let options = {
         baseUrl: 'i-am-hungry.glitch.me',
-        path: '/deleteRestaurant/' + restaurantId,
+        path: '/deleteRestaurant/' + restaurantId + '?bot=true',
         method: 'DELETE',
     };
     let isThereAnError = false;
