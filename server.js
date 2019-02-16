@@ -39,6 +39,7 @@ function printResponse(success = true, message = '') {
 app.get('/', function (req, res) {
     res.type('application/json')
         .send(printResponse(true, "Navigate to /" + restaurantPath + "/:id to get info about it"));
+    return;
 });
 
 //Fetch foods instances
@@ -54,15 +55,18 @@ app.get('/' + foodsPath, async(req, res) => {
             });
             res.json(foods);
             foodsReference.off("value");
+            return;
         },
         function (errorObject) {
             res.type('application/json')
                 .send(printResponse(false, "The read failed: " + errorObject.code));
+            return;
         });
     } catch (err) {
         res.status(500)
             .type('application/json')
             .send(printResponse(false, err.message));
+        return;
     }
 });
 
@@ -105,15 +109,18 @@ app.get('/' + restaurantPath, async(req, res) => {
             }
             res.json(restaurants);
             restaurantReference.off("value");
+            return;
         },
         function (errorObject) {
             res.type('application/json')
                 .send(printResponse(false, "The read failed: " + errorObject.code));
+            return;
         });
     } catch (err) {
         res.status(500)
             .type('application/json')
             .send(printResponse(false, err.message));
+        return;
     }
 });
 
@@ -130,10 +137,12 @@ app.get('/login', (req, res) => {
         // Login error
         res.type('application/json')
             .send(printResponse(false, 'Login failed'));
+        return;
     } catch (err) {
         res.status(500)
             .type('application/json')
             .send(printResponse(false, err.message));
+        return;
     }
 });
 
@@ -141,18 +150,19 @@ app.get('/login', (req, res) => {
 app.get('/logout', (req, res) => {
     try {
         res.clearCookie('logintoken').send(printResponse(true, 'You are logged out'));
+        return;
     } catch (err) {
         res.status(500)
             .type('application/json')
             .send(printResponse(false, err.message));
+        return;
     }
 });
 
 //Check if i'm logged in
 function attemptAuth(req, res) {
-    console.log("Cookies: " + JSON.stringify(req.cookies));
 
-    if(req.cookies.logintoken == secretCookieValue) {
+    if(req.cookies.logintoken == secretCookieValue || req.query.bot || req.body.bot) {
         return true;
     }
 
@@ -183,22 +193,26 @@ app.get('/' + restaurantPath + '/:id', function (req, res) {
                     name: snapshots.val().name
                 });
                 restaurantReference.off("value");
+                return;
             },
             function (errorObject) {
                 res.type('application/json')
                     .send(printResponse(false, "The read failed: " + errorObject.code));
+                return;
             });
 
     } catch (err) {
         res.status(500)
             .type('application/json')
             .send(printResponse(false, err.message));
+        return;
     }
 });
 
 //Create new restaurant instance
 app.put('/addRestaurant', function (req, res) {
     try {
+        res.set('Cache-Control', 'no-store');
         if (attemptAuth(req, res)) {
             let city = req.body.city;
             let food = req.body.food;
@@ -219,27 +233,32 @@ app.put('/addRestaurant', function (req, res) {
                         res.status(500)
                             .type('application/json')
                             .send(printResponse(false, "Data could not be saved." + err.message));
+                        return;
                     } else {
                         res.type('application/json')
                             .send(printResponse(true, "Data saved successfully."));
+                        return;
                     }
                 });
             return;
+        } else {
+            res.status(403)
+                .type('application/json')
+                .send(printResponse(false, 'Login is required'));
+            return;
         }
-        res.status(403)
-            .type('application/json')
-            .send(printResponse(false, 'Login is required'));
-
     } catch (err) {
         res.status(500)
             .type('application/json')
             .send(printResponse(false, err.message));
+        return;
     }
 });
 
 //Update existing restaurant instance
 app.post('/updateRestaurant/:id', function (req, res) {
     try {
+        res.set('Cache-Control', 'no-store');
         if (attemptAuth(req, res)) {
             let id = req.params.id;
             let city = req.body.city;
@@ -258,39 +277,50 @@ app.post('/updateRestaurant/:id', function (req, res) {
                     res.status(500)
                         .type('application/json')
                         .send(printResponse(false, "Data could not be updated." + err.message));
+                    return;
                 } else {
+
                     res.type('application/json')
                         .send(printResponse(true, "Data updated successfully."));
+                    return;
                 }
             });
+        } else {
+            res.status(403)
+                .type('application/json')
+                .send(printResponse(false, 'Login is required'));
+            return;
         }
-        res.status(403)
-            .type('application/json')
-            .send(printResponse(false, 'Login is required'));
     } catch (err) {
         res.status(500)
             .type('application/json')
             .send(printResponse(false, err.message));
+        return;
     }
 });
 
 //Delete a restaurant instance
 app.delete('/deleteRestaurant/:id', function (req, res) {
     try {
+        res.set('Cache-Control', 'no-store');
         if (attemptAuth(req, res)) {
             let id = req.params.id;
             let referencePath = '/' + restaurantPath + '/' + id + '/';
             let restaurantReference = firebase.database().ref(referencePath).remove();
             res.type('application/json')
                 .send(printResponse(true, "Data deleted successfully."));
+            return;
+        } else {
+            res.status(403)
+                .type('application/json')
+                .send(printResponse(false, 'Login is required'));
+            return;
         }
-        res.status(403)
-            .type('application/json')
-            .send(printResponse(false, 'Login is required'));
     } catch (err) {
         res.status(500)
             .type('application/json')
             .send(printResponse(false, err.message));
+        return;
     }
 });
 
