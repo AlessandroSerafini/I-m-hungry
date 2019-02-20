@@ -1,11 +1,6 @@
 const TelegramBot = require('node-telegram-bot-api');
 const telegramConfig = require("./telegramConfig");
 const webService = require("./webService");
-const googleApiKey = 'AIzaSyBtIQBtYgekv6YnUfXFGK3La0vm6armidQ';
-const googleApiBaseUrl = 'maps.googleapis.com';
-const googleMapsClient = require('@google/maps').createClient({
-    key: googleApiKey
-});
 
 const bot = new TelegramBot(telegramConfig.token, {polling: true});
 
@@ -86,29 +81,17 @@ function sendPlaceDetailMessage(chatId, restaurants) {
     let restaurantLabel = restaurants.length > 1 ? 'restaurants' : 'restaurant';
     bot.sendMessage(chatId, '<b>I\'ve found ' + restaurants.length + ' ' + restaurantLabel + ' based on your criteria</b> 🍗🍟', {parse_mode: 'HTML'});
     restaurants.forEach((restaurant) => {
-        let isThereAnError = false;
-        getPlaceId(restaurant).then((placeId) => {
-            getPlaceDetails(placeId).then((placeDetails) => {
-                let message = '<b>' + placeDetails.name + '</b><br/>';
-                let randomReviewIndex = Math.floor(Math.random() * placeDetails.reviews.length);
-                message += formatRestaurantStars(Math.round(placeDetails.rating)) + '<br/>' +
-                    placeDetails.formatted_address + '<br/>___________<br/>' +
-                    '<i>«' + placeDetails.reviews[randomReviewIndex].text + ' - ' + placeDetails.reviews[randomReviewIndex].author_name + '»</i>';
-                bot.sendMessage(chatId, br2nl(message), {
-                    parse_mode: 'HTML', reply_markup: {
-                        remove_keyboard: true
-                    }
-                });
-            }).catch(() => {
-                isThereAnError = true;
-            });
-        }).catch(() => {
-            isThereAnError = true;
-        });
 
-        if (isThereAnError) {
-            sendGetErrorMessage(chatId);
-        }
+        let message = '<b>' + restaurant.name + '</b><br/>';
+        let randomReviewIndex = Math.floor(Math.random() * restaurant.reviews.length);
+        message += formatRestaurantStars(Math.round(restaurant.rating)) + '<br/>' +
+            restaurant.formatted_address + '<br/>___________<br/>' +
+            '<i>«' + restaurant.reviews[randomReviewIndex].text + ' - ' + restaurant.reviews[randomReviewIndex].author_name + '»</i>';
+        bot.sendMessage(chatId, br2nl(message), {
+            parse_mode: 'HTML', reply_markup: {
+                remove_keyboard: true
+            }
+        });
     });
 }
 
@@ -318,53 +301,6 @@ function handleDeleteRestaurant(chatId) {
                     deleteRestaurant(chatId, restaurantId);
                 });
             });
-        });
-    });
-}
-
-
-// GET METHODS FROM GOOGLE
-
-function getPlaceId(restaurant) {
-    return new Promise((resolve, reject) => {
-        let options = {
-            baseUrl: googleApiBaseUrl,
-            path: '/maps/api/place/findplacefromtext/json?input=' + encodeURIComponent(restaurant.name + ' ' + restaurant.city) + '&inputtype=textquery&fields=place_id&key=' + googleApiKey,
-            method: 'GET',
-        };
-        webService.getJSON(options).then((res) => {
-            if (res.statusCode === 200) {
-                let candidates = res.obj.candidates;
-                if (candidates.length > 0) {
-                    let placeId = candidates[0].place_id;
-                    resolve(placeId);
-                } else {
-                    reject();
-                }
-            } else {
-                reject();
-            }
-        }).catch(() => {
-            reject();
-        });
-    });
-}
-
-function getPlaceDetails(placeId) {
-    return new Promise((resolve, reject) => {
-        let options = {
-            baseUrl: googleApiBaseUrl,
-            path: '/maps/api/place/details/json?placeid=' + placeId + '&fields=name,formatted_address,rating,url,reviews&key=' + googleApiKey,
-            method: 'GET',
-        };
-        webService.getJSON(options).then((res) => {
-            if (res.statusCode === 200) {
-                resolve(res.obj.result);
-            } else {
-                reject();
-            }
-        }).catch(() => {
-            reject();
         });
     });
 }
