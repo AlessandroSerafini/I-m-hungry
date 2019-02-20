@@ -1,6 +1,9 @@
 const express = require('express');
 const app = express();
 
+const googleApiKey = 'AIzaSyBtIQBtYgekv6YnUfXFGK3La0vm6armidQ';
+const webService = require("./webService");
+
 const bodyParser = require('body-parser');
 
 const firebase = require('firebase');
@@ -33,6 +36,63 @@ function printResponse(success = true, message = '') {
         success: success,
         message: message
     }
+}
+
+function getGooglePlace(placeName = '', placeCity = '') {
+    return new Promise((resolve, reject) => {
+        let options = {
+            baseUrl: 'maps.googleapis.com',
+            path: '/maps/api/place/findplacefromtext/json?input=' + encodeURIComponent(placeName + ' ' + placeCity) + '&inputtype=textquery&fields=place_id,photos&key=' + googleApiKey,
+            method: 'GET',
+        };
+    webService.getJSON(options)
+        .then((res) => {
+            resolve(res.obj.candidates);
+        }).catch((err) => {
+            reject(err);
+        });
+    });
+}
+
+function getGooglePlacePhoto(reference) {
+    return 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400' +
+        '&photoreference=' + reference + '&key=' + googleApiKey;
+}
+
+function getGooglePlaceDetails(placeId = '') {
+    return new Promise((resolve, reject) => {
+        let options = {
+            baseUrl: 'maps.googleapis.com',
+            path: '/maps/api/place/details/json?placeid=' + placeId + '&fields=formatted_address,geometry,formatted_phone_number,name,rating,reviews&key=' + googleApiKey,
+            method: 'GET',
+        };
+
+    webService.getJSON(options)
+        .then((res) => {
+            resolve(res.obj.result);
+        }).catch((err) => {
+            reject(err);
+        });
+    });
+}
+
+function completerestaurant(restaurant, restaurantFirebaseId) {
+    return new Promise(function (resolve, reject) {
+        getGooglePlace(restaurant.name, restaurant.city).then((place) => {
+            if (typeof place !== 'undefined') {
+                getGooglePlaceDetails(place[0].place_id).then((placeDetails) => {
+                    placeDetails.photoUrl = getGooglePlacePhoto(place[0].photos[0].photo_reference);
+                    placeDetails.id = restaurantFirebaseId;
+                    placeDetails.food = restaurant.food;
+                    resolve(placeDetails);
+                }).catch((err) => {
+                    reject(err);
+                });
+            }
+        }).catch((err) => {
+            reject(err);
+        });
+    });
 }
 
 // Root path: prints short instructions
@@ -81,35 +141,25 @@ app.get('/' + restaurantPath, async(req, res) => {
     //Attach an asynchronous callback to read the data
     restaurantReference.on("value",
         function (snapshots) {
-            let restaurants = [];
+            let promises = [];
+
 
             for (var k in snapshots.val()) {
                 if (snapshots.val().hasOwnProperty(k)) {
-
-                    if (req.query.name) {
-                        if (snapshots.val()[k].name.toLowerCase().includes(req.query.name.toLowerCase())) {
-                            restaurants.push({
-                                id: k,
-                                city: snapshots.val()[k].city,
-                                food: snapshots.val()[k].food,
-                                name: snapshots.val()[k].name
-                            });
-                        }
-                    } else {
-                        restaurants.push({
-                            id: k,
-                            city: snapshots.val()[k].city,
-                            food: snapshots.val()[k].food,
-                            name: snapshots.val()[k].name
-                        });
+                    if (!req.query.name || (req.query.name && snapshots.val()[k].name.toLowerCase().includes(req.query.name.toLowerCase()))) {
+                        promises.push(completerestaurant(snapshots.val()[k], k));
                     }
-
-
                 }
             }
-            res.json(restaurants);
-            restaurantReference.off("value");
-            return;
+            Promise.all(promises).then((restaurants) => {
+                res.json(restaurants);
+                restaurantReference.off("value");
+                return;
+            }).catch((err) => {
+                console.log(err);
+                restaurantReference.off("value");
+                return;
+            });
         },
         function (errorObject) {
             res.type('application/json')
@@ -130,7 +180,7 @@ app.get('/login', (req, res) => {
         if (attemptAuth(req, res)) {
             // Login successfully
             res.type('application/json')
-                .send(printResponse(true, 'Login successfully'));
+                .send(printResponse(true, secretCookieValue));
             return;
         }
 
