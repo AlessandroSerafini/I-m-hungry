@@ -377,7 +377,7 @@ function getFoods() {
 function addRestaurant(chatId, newRestaurant) {
     let options = {
         baseUrl: 'i-am-hungry.glitch.me',
-        path: '/addRestaurant' + '?bot=true',
+        path: '/addRestaurant',
         body: JSON.stringify(newRestaurant),
         method: 'PUT',
     };
@@ -431,7 +431,7 @@ function updateRestaurant(chatId, restaurantId, newData) {
 function deleteRestaurant(chatId, restaurantId) {
     let options = {
         baseUrl: 'i-am-hungry.glitch.me',
-        path: '/deleteRestaurant/' + restaurantId + '?bot=true',
+        path: '/deleteRestaurant/' + restaurantId,
         method: 'DELETE',
     };
     let isThereAnError = false;
