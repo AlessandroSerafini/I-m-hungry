@@ -1,4 +1,5 @@
 const https = require('https');
+const authConfig = require('./authConfig');
 
 module.exports = {
     getJSON: async function (options) {
@@ -9,7 +10,8 @@ module.exports = {
                 path: options.path,
                 method: options.method,
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': authConfig.secretCookieValue
                 }
             };
         let req = https.request(data, function (res) {
