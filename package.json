@@ -11,8 +11,7 @@
     "firebase": "^5.8.1",
     "firebase-admin": "^6.5.1",
     "node-telegram-bot-api": "^0.30.0",
-    "@google/maps": "^0.5.5",
-    "cookie-parser": "^1.4.4"
+    "@google/maps": "^0.5.5"
   },
   "engines": {
     "node": "9.x"
