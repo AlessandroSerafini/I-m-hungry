@@ -14,40 +14,42 @@ module.exports = {
                     'Authorization': authConfig.secretCookieValue
                 }
             };
-        let req = https.request(data, function (res) {
-            let output = '';
-            res.setEncoding('utf8');
+            let req = https.request(data, function (res) {
+                let output = '';
+                res.setEncoding('utf8');
 
-            res.on('data', function (chunk) {
-                output += chunk;
+                res.on('data', function (chunk) {
+                    output += chunk;
+                });
+
+                res.on('end', function () {
+                    try {
+                        let obj = JSON.parse(output);
+                        resolve({
+                            statusCode: res.statusCode,
+                            obj: obj
+                        });
+                    } catch (err) {
+                        reject({
+                            statusCode: 500,
+                            obj: err.message
+                        });
+                    }
+
+                });
             });
-
-            res.on('end', function () {
-                try {
-                    let obj = JSON.parse(output);
-                    resolve({
-                        statusCode: res.statusCode,
-                        obj: obj
-                    });
-                } catch (err) {
-                    reject({
-                        statusCode: 500,
-                        obj: err.message
-                    });
-                }
-
+            req.on('error', function (err) {
+                reject({
+                    statusCode: 500,
+                    obj: err.message
+                });
             });
+            if ('body' in options) {
+                req.write(options.body);
+            }
+            req.end();
         });
-        req.on('error', function (err) {
-            reject({
-                statusCode: 500,
-                obj: err.message
-            });
-        });
-        if ('body' in options) {
-            req.write(options.body);
-        }
-        req.end();
-    });
     }
 };
+
+
