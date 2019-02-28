@@ -571,7 +571,7 @@ module.exports = function(app) {
             if (methodsService.attemptAuth(req, res)) {
                 let id = req.params.id;
                 let referencePath = '/restaurants/' + id + '/';
-                let restaurantReference = firebase.database().ref(referencePath).remove();
+                firebase.database().ref(referencePath).remove();
                 res.type('application/json')
                     .send(methodsService.printResponse(true, "Data deleted successfully."));
                 return;
