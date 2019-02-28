@@ -11,7 +11,9 @@
     "firebase": "^5.8.1",
     "firebase-admin": "^6.5.1",
     "node-telegram-bot-api": "^0.30.0",
-    "@google/maps": "^0.5.5"
+    "@google/maps": "^0.5.5",
+    "swagger-ui-express": "^4.0.2",
+    "swagger-jsdoc": "^3.2.7"
   },
   "engines": {
     "node": "9.x"
