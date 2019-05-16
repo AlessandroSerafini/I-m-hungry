@@ -21,6 +21,9 @@ The [web client](https://github.com/AlessandroSerafini/I-m-hungry-frontend) ([he
 In addition to the map, a login panel is available: once authenticated it will be possible to handle restaurants entered by users, by adding them, modifying them or removing them.
 
 ## Telegram Bot
+
+![](https://i.ibb.co/XCVgGn8/Senza-titolo-1.jpg)
+
 You can also add, edit and delete restaurants using [Telegram bot](https://t.me/AleSerafiniBot) to keep the community alive!
 
 ## Documentation 
