@@ -1,6 +1,6 @@
 # I'm hungry
 
-This project is developed by Alessandro Serafini for the final exam of the course of PIATTAFORME DIGITALI PER LA GESTIONE DEL TERRITORIO - A.A. 2018/2019
+This project is developed by Alessandro Serafini (283058) for the final exam of the course of PIATTAFORME DIGITALI PER LA GESTIONE DEL TERRITORIO - A.A. 2018/2019
 
 ## About 
 
