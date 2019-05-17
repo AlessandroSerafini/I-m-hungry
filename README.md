@@ -57,6 +57,10 @@ In particular, the google places APIs have been used to retrieve restaurant data
 
 **NB:** Each of the services is accessed as an HTTP request, and returns either an JSON or XML response. All requests to a Places service must use the https:// protocol, and include an API key.
 
+### Remote Hosting
+
+The project is hosted on glitch.com, a free hosting website wich "sleeps" if it doesn't receive any request. You can find it [here](https://i-am-hungry.glitch.me/)
+
 ## Web client
 
 ![Restaurant map](https://i.ibb.co/ZcBcs8Z/Schermata-2019-05-16-alle-16-20-02.png)
