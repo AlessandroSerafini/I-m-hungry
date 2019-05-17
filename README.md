@@ -45,7 +45,17 @@ For the realization of the API I have chosen to use NodeJs and Express, a minima
 
 ### External Services
 
-ciaoone
+#### Google Places API
+
+The Places API is a service that returns information about places using HTTP requests. Places are defined within this API as establishments, geographic locations, or prominent points of interest.
+
+In particular, the google places APIs have been used to retrieve restaurant data from name and location:
+
+* **maps/api/place/findplacefromtext**: Used for retrieve restaurant `place_id` and `photos`, passing restaurant name and restaurant city.
+* **maps/api/place/details**: Used for retrieve the restaurant details data, such as `formatted_address`,`geometry`,`formatted_phone_number`,`name`,`rating`,`reviews`, passing `place_id`.
+* **maps/api/place/photo**: Used to retrieve restaurant pic, passing `photoreference` (retrieved in first pic of `photos` data)
+
+**NB:** Each of the services is accessed as an HTTP request, and returns either an JSON or XML response. All requests to a Places service must use the https:// protocol, and include an API key.
 
 ## Web client
 
