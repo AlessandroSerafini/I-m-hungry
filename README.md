@@ -55,7 +55,15 @@ In particular, the google places APIs have been used to retrieve restaurant data
 * **maps/api/place/details**: Used for retrieve the restaurant details data, such as `formatted_address`,`geometry`,`formatted_phone_number`,`name`,`rating`,`reviews`, passing `place_id`.
 * **maps/api/place/photo**: Used to retrieve restaurant pic, passing `photoreference` (retrieved in first pic of `photos` data)
 
-**NB:** Each of the services is accessed as an HTTP request, and returns either an JSON or XML response. All requests to a Places service must use the https:// protocol, and include an API key.
+**Licence**: The limits on use (after identity verification) is 100,000 requests per day - Google
+
+**Reminder**: To use the Places API, you must include an API key with all API requests and you must enable billing on each of your projects.
+
+### Example describing the use of Web service
+
+#### Getting restaurants
+
+TODO
 
 ### Remote Hosting
 
