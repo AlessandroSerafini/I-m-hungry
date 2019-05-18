@@ -158,6 +158,12 @@ module.exports = function(app) {
      *         example: Sushi
      */
 
+    app.get('/', async (req, res) => {
+        res.sendStatus(200)
+           .type('application/json');
+        return;
+    });
+
     /**
      * @swagger
      *
