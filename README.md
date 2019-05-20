@@ -74,9 +74,8 @@ In particular, the google places APIs have been used to retrieve restaurant data
 
 ### Example describing the use of Web service
 
-#### Getting restaurants
+For a technical and textual description of the project APIs please consult the [wiki pages](https://github.com/AlessandroSerafini/I-m-hungry/wiki) or the [swagger documentation](https://i-am-hungry.glitch.me/api-docs)
 
-TODO
 
 ### Remote Hosting
 
@@ -102,9 +101,7 @@ In addition to the map, a login panel is available: once authenticated it will b
 
 You can also add, edit and delete restaurants using [Telegram bot](https://t.me/AleSerafiniBot) to keep the community alive!
 
-## Documentation 
-
-Check [I'm hungry wiki](https://github.com/AlessandroSerafini/I-m-hungry/wiki)
+**Reminder**: It is specified that content management (insertion, editing and deletion) is available on telegram bot for illustrative purposes only and that in a possible version of the service it is convenient to limit the bot to the consultation only, thus leaving the content management to the client, after authentication.
 
 ## Dependencies
 
