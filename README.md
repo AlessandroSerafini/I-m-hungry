@@ -8,7 +8,7 @@ Find the best restaurants uploaded by users, based on criteria such as name and 
 
 ## Architecture description and implementation choices 
 
-In order to use properly this service, you need to create two files:
+In order to use properly this service, you need to create these files:
 
 **authConfig.js**
 ```
