@@ -19,6 +19,19 @@ module.exports = {
 };
 ````
 
+**firebaseConfig.js**
+```
+var firebase = require('firebase');
+var config = {
+    apiKey: "your-secret-firebase-api-key",
+    authDomain: "your-auth-domain",
+    databaseURL: "your-database-url",
+    projectId: "your-project-id",
+    storageBucket: "your-storage-bucket",
+    messagingSenderId: "your-messaging-sender-id"
+};
+````
+
 and
 
 **telegramConfig.js**
