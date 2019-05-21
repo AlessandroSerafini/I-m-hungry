@@ -152,7 +152,7 @@ module.exports = function(app) {
      *         example: https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=CmRaAAAASbjvYRmGkcGrk6MeJS6kxP4Rf1QUQuTHia9mE3tMsKVfqLOjo6-0ChvBw3PF5SXdVjx9cvFjks2BJePHC5hS8tul-6wO_91bBvh3eheRqf4FhwjhoXPHOIUIYC4K77F2EhA6MV6Uq6LCk3W2l02llvQ4GhRVAyug3F7eU6MSSBuTzzrMzMl1sQ&key=AIzaSyBtIQBtYgekv6YnUfXFGK3La0vm6armidQ
      *       id:
      *         type: string
-     *         example: -LZPS8Y6xFR6Dr-boYyk
+     *         example: -Lf1DiwxSBQ6razyLTbw
      *       food:
      *         type: string
      *         example: Sushi
@@ -313,7 +313,7 @@ module.exports = function(app) {
      *           properties:
      *             id:
      *               type: string
-     *               example: -LZPS8Y6xFR6Dr-boYyk
+     *               example: -Lf1DiwxSBQ6razyLTbw
      *             city:
      *               type: string
      *               example: Riccione
