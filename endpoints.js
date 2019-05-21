@@ -4,7 +4,7 @@ const authConfig = require('./authConfig');
 const methodsService = require("./methodsService");
 
 
-module.exports = function(app) {
+module.exports = function (app) {
     /**
      * @swagger
      *
@@ -160,7 +160,7 @@ module.exports = function(app) {
 
     app.get('/', async (req, res) => {
         res.sendStatus(200)
-           .type('application/json');
+            .type('application/json');
         return;
     });
 
@@ -191,16 +191,16 @@ module.exports = function(app) {
         try {
             let foodsReference = firebase.database().ref("/foods/");
             foodsReference.on("value",
-                function(snapshot) {
+                function (snapshot) {
                     let foods = [];
-                    snapshot.forEach(function(item) {
+                    snapshot.forEach(function (item) {
                         foods.push(item.val());
                     });
                     res.json(foods);
                     foodsReference.off("value");
                     return;
                 },
-                function(errorObject) {
+                function (errorObject) {
                     res.sendStatus(400)
                         .type('application/json')
                         .send(methodsService.printResponse(false, "The read failed: " + errorObject.code));
@@ -256,7 +256,7 @@ module.exports = function(app) {
                 restaurantReference = restaurantReference.orderByChild("food").equalTo(req.query.food);
             }
             restaurantReference.on("value",
-                function(snapshots) {
+                function (snapshots) {
                     let promises = [];
                     for (var k in snapshots.val()) {
                         if (snapshots.val().hasOwnProperty(k)) {
@@ -275,7 +275,7 @@ module.exports = function(app) {
                         return;
                     });
                 },
-                function(errorObject) {
+                function (errorObject) {
                     res.sendStatus(400)
                         .type('application/json')
                         .send(methodsService.printResponse(false, "The read failed: " + errorObject.code));
@@ -331,7 +331,7 @@ module.exports = function(app) {
      *       503:
      *         description: error
      */
-    app.get('/restaurants/:id', function(req, res) {
+    app.get('/restaurants/:id', function (req, res) {
         try {
             let id = req.params.id;
             let referencePath = '/restaurants/' + id + '/';
@@ -339,17 +339,23 @@ module.exports = function(app) {
 
             //Attach an asynchronous callback to read the data
             restaurantReference.on("value",
-                function(snapshots) {
-                    res.json({
-                        id: id,
-                        city: snapshots.val().city,
-                        food: snapshots.val().food,
-                        name: snapshots.val().name
-                    });
+                function (snapshots) {
+                    if (snapshots.val()) {
+                        res.json({
+                            id: id,
+                            city: snapshots.val().city,
+                            food: snapshots.val().food,
+                            name: snapshots.val().name
+                        });
+                    } else {
+                        res.sendStatus(400)
+                            .type('application/json')
+                            .send(methodsService.printResponse(false, "Restaurant not found"));
+                    }
                     restaurantReference.off("value");
                     return;
                 },
-                function(errorObject) {
+                function (errorObject) {
                     res.sendStatus(400)
                         .type('application/json')
                         .send(methodsService.printResponse(false, "The read failed: " + errorObject.code));
@@ -401,7 +407,7 @@ module.exports = function(app) {
      *           items:
      *               $ref: '#/definitions/UnauthorizedResponse'
      */
-    app.put('/addRestaurant', function(req, res) {
+    app.put('/addRestaurant', function (req, res) {
         try {
             res.set('Cache-Control', 'no-store');
             if (methodsService.attemptAuth(req, res)) {
@@ -419,7 +425,7 @@ module.exports = function(app) {
                         food: food,
                         name: name,
                     },
-                    function(err) {
+                    function (err) {
                         if (err) {
                             res.sendStatus(400)
                                 .type('application/json')
@@ -489,7 +495,7 @@ module.exports = function(app) {
      *           items:
      *               $ref: '#/definitions/UnauthorizedResponse'
      */
-    app.post('/updateRestaurant/:id', function(req, res) {
+    app.post('/updateRestaurant/:id', function (req, res) {
         try {
             res.set('Cache-Control', 'no-store');
             if (methodsService.attemptAuth(req, res)) {
@@ -505,7 +511,7 @@ module.exports = function(app) {
                         food: food,
                         name: name,
                     },
-                    function(err) {
+                    function (err) {
                         if (err) {
                             res.sendStatus(400)
                                 .type('application/json')
@@ -531,9 +537,6 @@ module.exports = function(app) {
             return;
         }
     });
-
-
-
 
 
     /**
@@ -571,7 +574,7 @@ module.exports = function(app) {
      *           items:
      *               $ref: '#/definitions/UnauthorizedResponse'
      */
-    app.delete('/deleteRestaurant/:id', function(req, res) {
+    app.delete('/deleteRestaurant/:id', function (req, res) {
         try {
             res.set('Cache-Control', 'no-store');
             if (methodsService.attemptAuth(req, res)) {
@@ -594,7 +597,6 @@ module.exports = function(app) {
             return;
         }
     });
-
 
 
     /**
