@@ -1,3 +1,4 @@
+![Logo](https://i.ibb.co/2nDxzqb/logo.png)
 # I'm hungry
 
 This project is developed by Alessandro Serafini (N.283058) for the final exam of the course of PIATTAFORME DIGITALI PER LA GESTIONE DEL TERRITORIO - A.A. 2018/2019
