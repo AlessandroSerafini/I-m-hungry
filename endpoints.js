@@ -201,15 +201,11 @@ module.exports = function (app) {
                     return;
                 },
                 function (errorObject) {
-                    res.sendStatus(400)
-                        .type('application/json')
-                        .send(methodsService.printResponse(false, "The read failed: " + errorObject.code));
+                    res.status(400).json(methodsService.printResponse(false, "The read failed: " + errorObject.code)).end();
                     return;
                 });
         } catch (err) {
-            res.sendStatus(400)
-                .type('application/json')
-                .send(methodsService.printResponse(false, err.message));
+            res.status(400).json(methodsService.printResponse(false, err.message)).end();
             return;
         }
     });
@@ -276,15 +272,11 @@ module.exports = function (app) {
                     });
                 },
                 function (errorObject) {
-                    res.sendStatus(400)
-                        .type('application/json')
-                        .send(methodsService.printResponse(false, "The read failed: " + errorObject.code));
+                    res.status(400).json(methodsService.printResponse(false, "The read failed: " + errorObject.code)).end();
                     return;
                 });
         } catch (err) {
-            res.sendStatus(400)
-                .type('application/json')
-                .send(methodsService.printResponse(false, err.message));
+            res.status(400).json(methodsService.printResponse(false, err.message)).end();
             return;
         }
     });
@@ -348,24 +340,18 @@ module.exports = function (app) {
                             name: snapshots.val().name
                         });
                     } else {
-                        res.sendStatus(400)
-                            .type('application/json')
-                            .send(methodsService.printResponse(false, "Restaurant not found"));
+                        res.status(400).json(methodsService.printResponse(false, "Restaurant not found")).end();
                     }
                     restaurantReference.off("value");
                     return;
                 },
                 function (errorObject) {
-                    res.sendStatus(400)
-                        .type('application/json')
-                        .send(methodsService.printResponse(false, "The read failed: " + errorObject.code));
+                    res.status(400).json(methodsService.printResponse(false, "The read failed: " + errorObject.code)).end();
                     return;
                 });
 
         } catch (err) {
-            res.sendStatus(400)
-                .type('application/json')
-                .send(methodsService.printResponse(false, err.message));
+            res.status(400).json(methodsService.printResponse(false, err.message)).end();
             return;
         }
     });
@@ -427,27 +413,20 @@ module.exports = function (app) {
                     },
                     function (err) {
                         if (err) {
-                            res.sendStatus(400)
-                                .type('application/json')
-                                .send(methodsService.printResponse(false, "Data could not be saved." + err.message));
+                            res.status(400).json(methodsService.printResponse(false, "Data could not be saved." + err.message)).end();
                             return;
                         } else {
-                            res.type('application/json')
-                                .send(methodsService.printResponse(true, "Data saved successfully."));
+                            res.status(200).json(methodsService.printResponse(true, "Data saved successfully.")).end();
                             return;
                         }
                     });
                 return;
             } else {
-                res.sendStatus(401)
-                    .type('application/json')
-                    .send(methodsService.printResponse(false, 'Login is required'));
+                res.status(401).json(methodsService.printResponse(false, "Login is required")).end();
                 return;
             }
         } catch (err) {
-            res.sendStatus(400)
-                .type('application/json')
-                .send(methodsService.printResponse(false, err.message));
+            res.status(400).json(methodsService.printResponse(false, err.message)).end();
             return;
         }
     });
@@ -513,27 +492,19 @@ module.exports = function (app) {
                     },
                     function (err) {
                         if (err) {
-                            res.sendStatus(400)
-                                .type('application/json')
-                                .send(methodsService.printResponse(false, "Data could not be updated." + err.message));
+                            res.status(400).json(methodsService.printResponse(false, "Data could not be updated." + err.message)).end();
                             return;
                         } else {
-
-                            res.type('application/json')
-                                .send(methodsService.printResponse(true, "Data updated successfully."));
+                            res.status(200).json(methodsService.printResponse(true, "Data updated successfully.")).end();
                             return;
                         }
                     });
             } else {
-                res.sendStatus(401)
-                    .type('application/json')
-                    .send(methodsService.printResponse(false, 'Login is required'));
+                res.status(401).json(methodsService.printResponse(false, "Login is required")).end();
                 return;
             }
         } catch (err) {
-            res.sendStatus(400)
-                .type('application/json')
-                .send(methodsService.printResponse(false, err.message));
+            res.status(400).json(methodsService.printResponse(false, err.message)).end();
             return;
         }
     });
@@ -581,19 +552,14 @@ module.exports = function (app) {
                 let id = req.params.id;
                 let referencePath = '/restaurants/' + id + '/';
                 firebase.database().ref(referencePath).remove();
-                res.type('application/json')
-                    .send(methodsService.printResponse(true, "Data deleted successfully."));
+                res.status(200).json(methodsService.printResponse(true, "Data deleted successfully.")).end();
                 return;
             } else {
-                res.sendStatus(401)
-                    .type('application/json')
-                    .send(methodsService.printResponse(false, 'Login is required'));
+                res.status(401).json(methodsService.printResponse(false, "Login is required")).end();
                 return;
             }
         } catch (err) {
-            res.sendStatus(400)
-                .type('application/json')
-                .send(methodsService.printResponse(false, err.message));
+            res.status(400).json(methodsService.printResponse(false, err.message)).end();
             return;
         }
     });
@@ -645,20 +611,15 @@ module.exports = function (app) {
         try {
             if (methodsService.attemptAuth(req, res)) {
                 // Login successfully
-                res.type('application/json')
-                    .send(methodsService.printResponse(true, authConfig.secretCookieValue));
+                res.status(200).json(methodsService.printResponse(true, authConfig.secretCookieValue)).end();
                 return;
             }
 
             // Login error
-            res.sendStatus(400)
-                .type('application/json')
-                .send(methodsService.printResponse(false, 'Login failed'));
+            res.status(400).json(methodsService.printResponse(false, "Login failed")).end();
             return;
         } catch (err) {
-            res.sendStatus(400)
-                .type('application/json')
-                .send(methodsService.printResponse(false, err.message));
+            res.status(400).json(methodsService.printResponse(false, err.message)).end();
             return;
         }
     });
