@@ -91,7 +91,7 @@ The project is hosted on glitch.com, a free hosting website wich "sleeps" if it 
 
 ![Edit restaurant](https://i.ibb.co/jR3SnXN/Schermata-2019-05-16-alle-16-20-41.png)
 
-The [web client](https://github.com/AlessandroSerafini/I-m-hungry-frontend) ([here the demo](https://uniurb.firebaseapp.com/)) allows you to consult the restaurants added by users through the use of a Google Map.
+The [web client](https://github.com/AlessandroSerafini/I-m-hungry-frontend) ([here the demo](https://uniurb.firebaseapp.com/)), developed in Angular 7, allows you to consult the restaurants added by users through the use of a Google Map.
 
 In addition to the map, a login panel is available: once authenticated it will be possible to handle restaurants entered by users, by adding them, modifying them or removing them.
 
